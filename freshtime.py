@@ -1,6 +1,10 @@
 from refreshbooks import api as freshbooks_api
 from codebase import API as CodebaseAPI
 from config import FRESHBOOKS, CODEBASE
+
+from pprint import PrettyPrinter
+pp = PrettyPrinter(indent=4)
+
 f = freshbooks_api.TokenClient(
     FRESHBOOKS['domain'],
     FRESHBOOKS['token'],
@@ -9,6 +13,8 @@ f = freshbooks_api.TokenClient(
 
 c = CodebaseAPI(**CODEBASE)
 
-time = c.get('/be-my-guest/time_sessions')
+entries = c.get('/be-my-guest/time_sessions').data
 
-print time.data
+for entry in entries:
+    print entry
+    print ""

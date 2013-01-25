@@ -1,5 +1,6 @@
 import requests
 import datetime
+import logging
 from collections import namedtuple
 from requests.auth import HTTPBasicAuth
 from bs4 import BeautifulSoup
@@ -22,6 +23,7 @@ coerce_field = {
     'integer': lambda x: int(x),
     'date': lambda d: datetime.date(*[int(x) for x in d.split('-')]),
 }
+
 def parse_field(field):
     if not field.get('type'):
         return field.text
@@ -37,28 +39,23 @@ class APIResponse(object):
         self.data = []
         self.soup = list(self.soup.children)[0]
 
-    # def __iter__(self):
-    #     return self
-
-    # def next(self):
-    #     return self.parse(self.soup.children.next())
-
-    # def parse(self, child):
-    #     return child
-
-
     def parse(self):
         for child in self.soup.children:
+            if child == '\n':
+                continue
             try:
                 fields = {}
                 for field in child.children:
+                    if field == '\n':
+                        continue
                     try:
                         fields[field.name.replace('-', '_')] = parse_field(field)
                     except AttributeError:
-                        pass
+                        logging.warning("FAILED TO PARSE FIELD {} {}".format(
+                            repr(field), repr(child)))
                 self.data.append(TimeSession(**fields))
             except AttributeError:
-                pass
+                logging.warning("FAILED TO PARSE CHILD {}".format(repr(child)))
 
 class API(object):
     def __init__(self, username, key, base=None):
