@@ -79,8 +79,6 @@ if __name__ == '__main__':
     f = freshbooks_api.TokenClient(
         FRESHBOOKS['domain'],
         FRESHBOOKS['token'],
-        # request_encoder=logging_request_encoder,
-        # response_decoder=logging_response_decoder
     )
     c = CodebaseAPI(
         username=CODEBASE['username'],
