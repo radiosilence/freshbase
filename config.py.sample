@@ -1,0 +1,13 @@
+FRESHBOOKS = {
+    'domain': 'yourdomain.freshbooks.com',
+    'token': 'YOURTOKEN',
+    'project_id': 1,
+    'task_id': 1,
+}
+
+CODEBASE = {
+    'username': 'yourcodebase/youruser',
+    'key': 'YOURKEY',
+    'user_id': 1,  # User ID for timesheets
+}
+
