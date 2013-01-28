@@ -84,9 +84,4 @@ if __name__ == '__main__':
         username=CODEBASE['username'],
         key=CODEBASE['key']
     )
-    entries = c.get('/be-my-guest/time_sessions').data
-    codebase_entries = filter(
-        lambda e: e['user_id'] == CODEBASE['user_id'],
-        entries
-    )
     main(f, c)
