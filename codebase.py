@@ -4,12 +4,10 @@ import logging
 from requests.auth import HTTPBasicAuth
 from lxml import etree
 
-
 coerces = {
     'integer': lambda x: int(x),
     'date': lambda d: datetime.date(*[int(x) for x in d.split('-')]),
 }
-
 
 def parse_field(field):
     if not field.get('type'):
@@ -36,11 +34,11 @@ class APIResponse(object):
                     try:
                         fields[field.tag.replace('-', '_')] = parse_field(field)
                     except AttributeError as e:
-                        logging.warning("FAILED TO PARSE FIELD {} {}: {}".format(
+                        logging.debug("FAILED TO PARSE FIELD {} {}: {}".format(
                             repr(field), repr(child), e))
                 self.data.append(fields)
             except AttributeError:
-                logging.warning("FAILED TO PARSE CHILD {}: {}".format(repr(child, e)))
+                logging.debug("FAILED TO PARSE CHILD {}: {}".format(repr(child, e)))
 
 class API(object):
     def __init__(self, username, key, base=None):
