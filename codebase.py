@@ -28,7 +28,6 @@ class APIResponse(object):
             try:
                 fields = {}
                 for field in child.getchildren():
-                    # import ipdb; ipdb.set_trace()
                     if field == '\n':
                         continue
                     try:
