@@ -1,6 +1,4 @@
-import datetime
 from refreshbooks import api as freshbooks_api
-from refreshbooks.api import logging_request_encoder, logging_response_decoder
 from codebase import API as CodebaseAPI
 from config import FRESHBOOKS, CODEBASE
 from clint.textui import puts, colored
@@ -22,7 +20,7 @@ def import_page(time_entries, fresh_entries):
         try:
             entry_id = parse_notes(time_entry.notes)
             fresh_entries[entry_id] = time_entry.time_entry_id
-        except Exception as e:
+        except Exception:
             continue
 
 
