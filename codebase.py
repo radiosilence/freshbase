@@ -4,10 +4,12 @@ import logging
 from requests.auth import HTTPBasicAuth
 from lxml import etree
 
+
 coerces = {
     'integer': lambda x: int(x),
     'date': lambda d: datetime.date(*[int(x) for x in d.split('-')]),
 }
+
 
 def parse_field(field):
     if not field.get('type'):

@@ -1,6 +1,6 @@
 from refreshbooks import api as freshbooks_api
 from codebase import API as CodebaseAPI
-from config import FRESHBOOKS, CODEBASE
+from config import ACCOUNTS
 from clint.textui import puts, colored
 
 
@@ -24,15 +24,15 @@ def import_page(time_entries, fresh_entries):
             continue
 
 
-def create_time_entry(f, entry):
+def create_time_entry(f, entry, project_id, task_id):
     puts(u"[FreshBooks] Creating entry {}".format(
         time_entry_text(entry)
     ))
     try:
         f.time_entry.create(
             time_entry=dict(
-                project_id=FRESHBOOKS['project_id'],
-                task_id=FRESHBOOKS['task_id'],
+                project_id=project_id,
+                task_id=task_id,
                 notes=time_entry_text(entry),
                 date=entry['session_date'].strftime('%Y-%m-%d'),
                 hours=(entry['minutes'] / 60.0)
@@ -42,11 +42,21 @@ def create_time_entry(f, entry):
         puts(colored.red(u'[Freshbooks] ERROR {}'.format(e)))
 
 
-def main(f, c):
-    entries = c.get('/be-my-guest/time_sessions').data
+def update_account(freshbooks_config, codebase_config):
+    f = freshbooks_api.TokenClient(
+        freshbooks_config['domain'],
+        freshbooks_config['token'],
+    )
+    c = CodebaseAPI(
+        username=codebase_config['username'],
+        key=codebase_config['key']
+    )
+    entries = c.get(
+        '/{project_name}/time_sessions'.format(**codebase_config)
+    ).data
 
     codebase_entries = filter(
-        lambda e: e['user_id'] == CODEBASE['user_id'],
+        lambda e: e['user_id'] == codebase_config['user_id'],
         entries
     )
 
@@ -56,30 +66,33 @@ def main(f, c):
     r = f.time_entry.list(
         per_page=100,
         page=1,
-        project_id=FRESHBOOKS['project_id'],
+        project_id=freshbooks_config['project_id'],
     )
     time_entries = r.getchildren()[0]
     total_pages = int(time_entries.get('pages'))
     import_page(time_entries, fresh_entry_ids)
     puts(u"[FreshBooks] Got first page")
+
     for i in range(1, total_pages):
         r = f.time_entry.list(per_page=100, page=i + 1)
         puts(u"[FreshBooks] Got page {}".format(i + 1))
         time_entries = r.getchildren()[0]
         import_page(time_entries, fresh_entry_ids)
+
     for entry in codebase_entries:
         if entry['id'] in fresh_entry_ids:
             continue
-        create_time_entry(f, entry)
+        create_time_entry(
+            f,
+            entry,
+            freshbooks_config['project_id'],
+            freshbooks_config['task_id']
+        )
 
+
+def main():
+    for account in ACCOUNTS:
+        update_account(account['freshbooks'], account['codebase'])
 
 if __name__ == '__main__':
-    f = freshbooks_api.TokenClient(
-        FRESHBOOKS['domain'],
-        FRESHBOOKS['token'],
-    )
-    c = CodebaseAPI(
-        username=CODEBASE['username'],
-        key=CODEBASE['key']
-    )
-    main(f, c)
+    main()
